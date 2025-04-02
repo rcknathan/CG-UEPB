@@ -83,6 +83,39 @@ h3 {
     text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
 }
 
+/*informações sobre o objeto*/
+/* --- Sidebar Direita --- */
+#right-bar {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+#right-bar h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+#object-info {
+    margin-top: 10px; /* Espaço abaixo do título */
+}
+
+.info-box {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    margin: 5px 0;
+    font-family: monospace;
+    font-size: 13px;
+}
+
+#clear-canvas-btn {
+    margin-top: auto; /* Fixa o botão no final */
+    padding: 8px;
+    border-radius: 10px;
+}
+
 /* Aumentar a altura do select */
 #algorithm-select {
     height: 30px; /* Ajuste conforme necessário */
