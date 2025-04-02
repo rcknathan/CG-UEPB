@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="left-bar">
+        <h3>Informações Do Plano</h3>
+        <hr>
+        <p id="live-coords"></p>
+        <div id="input-div">
+            <div>
+                <label for="algorithm-select">Algoritmo:</label>
+                <select id="algorithm-select">
+                    <option value="dda">DDA</option>
+                    <option value="ponto-medio">Ponto Médio</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label for="x1">X Inicial:</label>
+                <input type="number" id="x1" name="x1" value="0">
+            </div>
+            <div>
+                <label for="y1">Y Inicial:</label>
+                <input type="number" id="y1" name="y1" value="0">
+            </div>
+            <br>
+            <div>
+                <label for="x2">X Final:</label>
+                <input type="number" id="x2" name="x2" value="0">
+            </div>
+            <div>
+                <label for="y2">Y Final:</label>
+                <input type="number" id="y2" name="y2" value="0">
+            </div>
+            <button id="draw-line-btn">Desenhar</button>
+        </div> 
+    </div>
+    <div class="main">
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <p id="credits1">Implementado por: Erick Nathan, Pedro Lucas</p>
+        <p id="credits2">Computação Gráfica - Prof. Robson Pequeno de Souza</p>
+        <a id="back" href="../1-Tela Principal/index.html">Voltar ao Início</a>
+    </div>
+    <div class="sidebar" id="right-bar">
+        <h3>Informações Da Reta Atual</h3>
+        <hr>
+        <p id="no-line-message">Nenhuma reta desenhada</p> <!-- Mensagem inicial -->
+        <div id="clicked-coords" style="display: none;">
+            <div class="coord-row">
+                <strong>X Inicial:</strong> <span id="x-initial"></span>
+                <strong>Y Inicial:</strong> <span id="y-initial"></span>
+            </div>
+            <div class="coord-row">
+                <strong>X Final:</strong> <span id="x-final"></span>
+                <strong>Y Final:</strong> <span id="y-final"></span>
+            </div>
+            <div class="scroll-container">
+
+            </div>
+        </div>
+        <div id="input-div">
+            <button id="clear-btn">Limpar</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

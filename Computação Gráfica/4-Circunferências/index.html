@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Circunferências</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="left-bar">
+        <h3>Informações Do Plano</h3>
+        <hr>
+        <p id="live-coords"></p>
+        <div id="input-div">
+            <div>
+                <label for="algorithm-select">Algoritmo:</label>
+                <select id="algorithm-select">
+                    <option value="eqex">Equação Explícita</option>
+                    <option value="trigo">Trigonométrico</option>
+                    <option value="ponto-medio">Ponto Médio</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label for="r">Raio:</label>
+                <input type="number" id="r" name="r" value="0">
+            </div>
+            <br>
+            <div>
+                <label for="x">X:</label>
+                <input type="number" id="x" name="x" value="0">
+            </div>
+            <div>
+                <label for="y">Y:</label>
+                <input type="number" id="y" name="y" value="0">
+            </div>
+            <button id="draw-line-btn">Desenhar</button>
+        </div> 
+    </div>
+    <div class="main">
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <p id="credits1">Implementado por: Erick Nathan, Pedro Lucas</p>
+        <p id="credits2">Computação Gráfica - Prof. Robson Pequeno de Souza</p>
+        <a id="back" href="../1-Tela Principal/index.html">Voltar ao Início</a>
+    </div>
+    <div class="sidebar" id="right-bar">
+        <h3>Informações Da Circunferência Atual</h3>
+        <hr>
+        <p id="no-line-message">Nenhuma circunferência desenhada</p> <!-- Mensagem inicial -->
+        <div id="clicked-coords" style="display: none;">
+            <div class="coord-row">
+                <strong>X:</strong> <span id="x-ponto"></span>
+                <strong>Y:</strong> <span id="y-ponto"></span>
+                <strong>Raio:</strong> <span id="raio"></span>
+            </div>
+            <div class="scroll-container">
+
+            </div>
+        </div>
+        <div id="input-div">
+            <button id="clear-btn">Limpar</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
