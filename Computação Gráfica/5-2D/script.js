@@ -4,8 +4,8 @@ const drawSquareBtn = document.getElementById("draw-square-btn");
 const clearCanvasBtn = document.getElementById("clear-canvas-btn");
 
 // Definir tamanho do canvas
-canvas.width = 500;
-canvas.height = 500;
+canvas.width = 1280;
+canvas.height = 720;
 
 // Desenhar eixos cartesianos
 function desenharQuadrantes() {
@@ -53,26 +53,57 @@ function dda(x1, y1, x2, y2) {
 //para armazenar os pontos do quadrado anteriores para as operações.
 let quadradoAtual = [];
 
-function drawSquareDDA() {
+function drawCustomSquareDDA() {
+    // Obter valores ou usar padrão (50x50 no primeiro quadrante)
+    const size = parseInt(document.getElementById('square-size').value) || 50;
+    const startX = parseInt(document.getElementById('square-x').value) || 0;
+    const startY = parseInt(document.getElementById('square-y').value) || 0;
+
+    // Limpar canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     desenharQuadrantes();
 
-    const size = 50;
+    // Calcular vértices (primeiro quadrante)
     quadradoAtual = [
-        { x: 0, y: 0 },
-        { x: size, y: 0 },
-        { x: size, y: size },
-        { x: 0, y: size }
+        { x: startX, y: startY },          // Vértice inferior esquerdo
+        { x: startX + size, y: startY },    // Vértice inferior direito
+        { x: startX + size, y: startY + size }, // Vértice superior direito
+        { x: startX, y: startY + size }     // Vértice superior esquerdo
     ];
 
-    // Desenhar o quadrado
+    // Desenhar usando DDA
     for (let i = 0; i < quadradoAtual.length; i++) {
-        const proximo = (i + 1) % quadradoAtual.length;
-        dda(quadradoAtual[i].x, quadradoAtual[i].y, quadradoAtual[proximo].x, quadradoAtual[proximo].y);
+        const current = quadradoAtual[i];
+        const next = quadradoAtual[(i + 1) % quadradoAtual.length];
+        dda(current.x, current.y, next.x, next.y);
     }
 
-    atualizarInformacoesObjeto()
+    atualizarInformacoesObjeto();
 }
+
+// Event Listener
+document.getElementById('draw-square-btn').addEventListener('click', drawCustomSquareDDA);
+
+// Função para desenhar linha (DDA)
+function dda(x1, y1, x2, y2) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const steps = Math.max(Math.abs(dx), Math.abs(dy));
+    
+    const xInc = dx / steps;
+    const yInc = dy / steps;
+
+    let x = x1;
+    let y = y1;
+
+    for (let i = 0; i <= steps; i++) {
+        setPixel(Math.round(x), Math.round(y));
+        x += xInc;
+        y += yInc;
+    }
+}
+
+
 
 //Matriz Homogênea (usada nas operações)
 function multiplicarMatrizVetor(matriz, vetor) {
@@ -369,7 +400,7 @@ function clearCanvas() {
 }
 
 // Eventos para os botões
-drawSquareBtn.addEventListener("click", drawSquareDDA);
+drawSquareBtn.addEventListener("click", drawCustomSquareDDA);
 clearCanvasBtn.addEventListener("click", clearCanvas);
 document.querySelectorAll('.type-op')[0].addEventListener('click', aplicarTranslacaoMatriz);
 document.querySelectorAll('.type-op')[1].addEventListener('click', aplicarEscalaMatriz);

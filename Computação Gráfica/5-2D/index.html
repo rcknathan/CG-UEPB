@@ -11,11 +11,23 @@
         <h3>Transformações Geométricas</h3>
         <hr>
         <div id="input-div">
-            <div>
-                <button id="draw-square-btn">Gerar Quadrado</button>
+            <div class="square-config">
+                <h3 id="title-h">Configurar Quadrado</h3>
+                <div class="config-row">
+                    <label for="square-size" class="config-label">Tamanho:</label>
+                    <input type="number" id="square-size" class="config-input" value="50" min="1">
+                </div>
+                <div class="config-row">
+                    <label for="square-x" class="config-label">Posição X:</label>
+                    <input type="number" id="square-x" class="config-input" value="0">
+                </div>
+                <div class="config-row">
+                    <label for="square-y" class="config-label">Posição Y:</label>
+                    <input type="number" id="square-y" class="config-input" value="0">
+                </div>
+                <button id="draw-square-btn" class="generate-btn">Gerar Quadrado</button>
             </div>
-
-            <hr>
+        </div>
             <h3 id="title-h">Translação</h3>
             <div class="number-inputs">
                 <div>
