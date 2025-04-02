@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformações Geométricas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="sidebar" id="left-bar">
+        <h3>Transformações Geométricas</h3>
+        <hr>
+        <div id="input-div">
+            <div>
+                <button id="draw-square-btn">Gerar Quadrado</button>
+            </div>
+
+            <hr>
+            <h3>Translação</h3>
+            <div class="number-inputs">
+                <div>
+                    <label for="x-translation">X:</label>
+                    <input type="number" id="x-translation" name="x-translation" value="0">
+                </div>
+                <div>
+                    <label for="y-translation">Y:</label>
+                    <input type="number" id="y-translation" name="y-translation" value="0">
+                </div>
+            </div>
+            <button class="type-op">Aplicar Translação</button>
+            <hr>
+            <h3>Escala</h3>
+            <div class="number-inputs">
+                <div>
+                    <label for="x-scale">X:</label>
+                    <input type="number" id="x-scale" name="x-scale" value="0">
+                </div>
+                <div>
+                    <label for="y-scale">Y:</label>
+                    <input type="number" id="y-scale" name="y-scale" value="0">
+                </div>
+            </div>
+            <button class="type-op">Aplicar Escala</button>
+            <hr>
+            <h3>Rotação</h3>
+            <div class="number-inputs">
+                <div>
+                    <label for="x-rotation">X:</label>
+                    <input type="number" id="x-rotation" name="x-rotation" value="0">
+                </div>
+                <div>
+                    <label for="y-rotation">Y:</label>
+                    <input type="number" id="y-rotation" name="y-rotation" value="0">
+                </div>
+            </div>
+            <div>
+                <label for="angle">Ângulo:</label>
+                <input type="number" id="angle" name="angle" value="0" id="angle">
+            </div>
+            <button class="type-op">Aplicar Rotação</button>
+            <hr>
+            <h3>Reflexão</h3>
+            <div class="number-inputs">
+                <div>
+                    <label>
+                        <input type="checkbox"> Em X
+                        <input type="checkbox"> Em Y
+                    </label>
+                </div>
+            </div>
+            <hr>
+            <h3>Cisalhamento</h3>
+            <div class="number-inputs">
+                <div>
+                    <label for="x-rotation">X:</label>
+                    <input type="number" id="x-rotation" name="x-rotation" value="0">
+                </div>
+                <div>
+                    <label for="y-rotation">Y:</label>
+                    <input type="number" id="y-rotation" name="y-rotation" value="0">
+                </div>
+            </div>
+            <button class="type-op">Aplicar Cisalhamento</button>
+        </div> 
+    </div>
+    <div class="main">
+        <canvas id="canvas" width="600" height="400"></canvas>
+        <p id="credits1">Implementado por: Erick Nathan, Pedro Lucas</p>
+        <p id="credits2">Computação Gráfica - Prof. Robson Pequeno de Souza</p>
+        <a id="back" href="../1-Tela Principal/index.html">Voltar ao Início</a>
+    </div>
+    <div class="sidebar" id="right-bar">
+        <h3>Informações Do Objeto</h3>
+        <hr>
+        <div id="input-div">
+            <button id="clear-canvas-btn">Limpar</button>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
