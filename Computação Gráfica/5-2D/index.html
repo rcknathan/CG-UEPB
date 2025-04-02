@@ -16,7 +16,7 @@
             </div>
 
             <hr>
-            <h3>Translação</h3>
+            <h3 id="title-h">Translação</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-translation">X:</label>
@@ -29,7 +29,7 @@
             </div>
             <button class="type-op">Aplicar Translação</button>
             <hr>
-            <h3>Escala</h3>
+            <h3 id="title-h">Escala</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-scale">X:</label>
@@ -42,7 +42,7 @@
             </div>
             <button class="type-op">Aplicar Escala</button>
             <hr>
-            <h3>Rotação</h3>
+            <h3 id="title-h">Rotação</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-rotation">X:</label>
@@ -59,15 +59,30 @@
             </div>
             <button class="type-op">Aplicar Rotação</button>
             <hr>
-            <h3>Cisalhamento</h3>
+            <h3 id="title-h">Reflexão</h3>
             <div class="number-inputs">
                 <div>
-                    <label for="x-rotation">X:</label>
-                    <input type="number" id="x-rotation" name="x-rotation" value="0">
+                    <label for="x-ref">
+                        <input type="checkbox" id="x-ref" name="x-ref" value="0" class="check"> Em X
+                    </label>
                 </div>
                 <div>
-                    <label for="y-rotation">Y:</label>
-                    <input type="number" id="y-rotation" name="y-rotation" value="0">
+                    <label for="y-ref">
+                        <input type="checkbox" id="y-ref" name="y-ref" value="0" class="check"> Em Y
+                    </label>
+                </div>
+            </div>
+            <button class="type-op">Aplicar Reflexão</button>
+            <hr>
+            <h3 id="title-h">Cisalhamento</h3>
+            <div class="number-inputs">
+                <div>
+                    <label for="x-cis">X:</label>
+                    <input type="number" id="x-cis" name="x-cis" value="0">
+                </div>
+                <div>
+                    <label for="y-cis">Y:</label>
+                    <input type="number" id="y-cis" name="y-cis" value="0">
                 </div>
             </div>
             <button class="type-op">Aplicar Cisalhamento</button>

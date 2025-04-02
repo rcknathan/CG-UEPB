@@ -49,6 +49,14 @@ h3 {
     font-size: 15px;
 }
 
+#title-h {
+    margin: 5px;
+}
+
+.check {
+    margin: 0;
+}
+
 #credits1, #credits2 {
     position: fixed;
     left: 50%;
