@@ -8,27 +8,10 @@
 </head>
 <body>
     <div class="sidebar" id="left-bar">
-        <h3>Transformações Geométricas</h3>
+        <h3 id="title-bar">Transformações Geométricas</h3>
         <hr>
-        <div id="input-div">
-            <div class="square-config">
-                <h3 id="title-h">Configurar Quadrado</h3>
-                <div class="config-row">
-                    <label for="square-size" class="config-label">Tamanho:</label>
-                    <input type="number" id="square-size" class="config-input" value="50" min="1">
-                </div>
-                <div class="config-row">
-                    <label for="square-x" class="config-label">Posição X:</label>
-                    <input type="number" id="square-x" class="config-input" value="0">
-                </div>
-                <div class="config-row">
-                    <label for="square-y" class="config-label">Posição Y:</label>
-                    <input type="number" id="square-y" class="config-input" value="0">
-                </div>
-                <button id="draw-square-btn" class="generate-btn">Gerar Quadrado</button>
-            </div>
-        </div>
-            <h3 id="title-h">Translação</h3>
+        <div id="content-bar">
+            <h3 id="title-h">Translação:</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-translation">X:</label>
@@ -41,7 +24,7 @@
             </div>
             <button class="type-op">Aplicar Translação</button>
             <hr>
-            <h3 id="title-h">Escala</h3>
+            <h3 id="title-h">Escala:</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-scale">X:</label>
@@ -54,7 +37,7 @@
             </div>
             <button class="type-op">Aplicar Escala</button>
             <hr>
-            <h3 id="title-h">Rotação</h3>
+            <h3 id="title-h">Rotação:</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-rotation">X:</label>
@@ -71,7 +54,7 @@
             </div>
             <button class="type-op">Aplicar Rotação</button>
             <hr>
-            <h3 id="title-h">Reflexão</h3>
+            <h3 id="title-h">Reflexão:</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-ref">
@@ -86,7 +69,7 @@
             </div>
             <button class="type-op">Aplicar Reflexão</button>
             <hr>
-            <h3 id="title-h">Cisalhamento</h3>
+            <h3 id="title-h">Cisalhamento:</h3>
             <div class="number-inputs">
                 <div>
                     <label for="x-cis">X:</label>
@@ -98,7 +81,27 @@
                 </div>
             </div>
             <button class="type-op">Aplicar Cisalhamento</button>
-        </div> 
+            <hr>
+            <div class="square-config">
+                <h3 id="title-h">Configurar Quadrado:</h3>
+                <div class="config-row">
+                    <label for="square-size" class="config-label">Tamanho:</label>
+                    <input type="number" id="square-size" class="config-input" value="50" min="1">
+                </div>
+                <div class="config-row">
+                    <label for="square-x" class="config-label">Posição X:</label>
+                    <input type="number" id="square-x" class="config-input" value="0">
+                </div>
+                <div class="config-row">
+                    <label for="square-y" class="config-label">Posição Y:</label>
+                    <input type="number" id="square-y" class="config-input" value="0">
+                </div>
+                <div id="input-div">
+                    <button id="draw-square-btn" class="generate-btn">Gerar Quadrado</button>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
     <div class="main">
         <canvas id="canvas" width="600" height="400"></canvas>
@@ -108,14 +111,14 @@
     </div>
     <div class="sidebar" id="right-bar">
         <h3>Informações do Objeto</h3>
-    <hr>
-    <div id="object-info">
-        <h4>Vértices:</h4>
-        <div id="vertices-list" class="info-box"></div>
-        <h4>Centro:</h4>
-        <div id="center-position" class="info-box"></div>
-    </div>
-    <button id="clear-canvas-btn">Limpar</button>
+        <hr>
+        <div id="object-info">
+            <h4>Vértices:</h4>
+            <div id="vertices-list" class="info-box">Nenhum objeto gerado.</div>
+            <h4>Centro:</h4>
+            <div id="center-position" class="info-box">Nenhum objeto gerado.</div>
+        </div>
+        <button id="clear-canvas-btn">Limpar</button>
     </div>
     
     <script src="script.js"></script>

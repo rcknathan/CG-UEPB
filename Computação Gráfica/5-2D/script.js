@@ -4,8 +4,8 @@ const drawSquareBtn = document.getElementById("draw-square-btn");
 const clearCanvasBtn = document.getElementById("clear-canvas-btn");
 
 // Definir tamanho do canvas
-canvas.width = 1280;
-canvas.height = 720;
+canvas.width = 500;
+canvas.height = 500;
 
 // Desenhar eixos cartesianos
 function desenharQuadrantes() {
@@ -242,20 +242,32 @@ function aplicarEscalaMatriz() {
         return;
     }
 
-    // Criar matriz de escala
-    const matrizEscala = criarMatrizEscala(sx, sy);
+    // Definir o ponto fixo (50,50)
+    const pontoFixoX = 50;
+    const pontoFixoY = 50;
 
-    // Aplicar a cada ponto do quadrado
+    // Criar as matrizes de transformação
+    const matrizTranslacaoParaOrigem = criarMatrizTranslacao(-pontoFixoX, -pontoFixoY);
+    const matrizEscala = criarMatrizEscala(sx, sy);
+    const matrizTranslacaoDeVolta = criarMatrizTranslacao(pontoFixoX, pontoFixoY);
+
+    // Matriz composta: T⁻¹ × Escala × T
+    const matrizFinal = multiplicarMatrizes(
+        matrizTranslacaoDeVolta,
+        multiplicarMatrizes(matrizEscala, matrizTranslacaoParaOrigem)
+    );
+
+    // Aplicar transformação
     const novosPontos = quadradoAtual.map(ponto => {
         const vetor = [ponto.x, ponto.y];
-        const [novoX, novoY] = multiplicarMatrizVetor(matrizEscala, vetor);
+        const [novoX, novoY] = multiplicarMatrizVetor(matrizFinal, vetor);
         return { x: novoX, y: novoY };
     });
 
     // Redesenhar e atualizar
     redesenharQuadrado(novosPontos);
     quadradoAtual = novosPontos;
-    atualizarInformacoesObjeto()
+    atualizarInformacoesObjeto();
 }
 
 //Matriz Cisalhamento
@@ -365,7 +377,7 @@ function redesenharQuadrado(pontos) {
 function atualizarInformacoesObjeto() {
     if (quadradoAtual.length === 0) {
         document.getElementById("vertices-list").innerHTML = "Nenhum objeto gerado.";
-        document.getElementById("center-position").innerHTML = "N/A";
+        document.getElementById("center-position").innerHTML = "Nenhum objeto gerado.";
         return;
     }
 
@@ -396,7 +408,7 @@ function clearCanvas() {
     
     // Limpa as informações exibidas na sidebar
     document.getElementById("vertices-list").innerHTML = "Nenhum objeto gerado.";
-    document.getElementById("center-position").innerHTML = "N/A";
+    document.getElementById("center-position").innerHTML = "Nenhum objeto gerado.";
 }
 
 // Eventos para os botões

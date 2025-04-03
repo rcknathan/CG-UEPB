@@ -91,9 +91,14 @@ h3 {
     flex-direction: column;
 }
 
-#right-bar h3 {
-    margin: 0;
-    font-size: 16px;
+#content-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+
+#content-bar > * {
+    margin: 0.5px 0; /* Controla o espaçamento vertical */
 }
 
 #object-info {
@@ -111,7 +116,7 @@ h3 {
 }
 
 #clear-canvas-btn {
-    margin-top: auto; /* Fixa o botão no final */
+    margin-top: auto;
     padding: 8px;
     border-radius: 10px;
 }
@@ -191,6 +196,7 @@ h3 {
     justify-content: center;
     align-items: center;
     border-radius: 20px;
+    margin: 0;
 }
 
 .number-inputs div:last-child {
@@ -198,7 +204,7 @@ h3 {
 }
 
 #angle {
-    width: 110px;
+    width: 104px;
 }
 
 #input-xmax, #input-xmin, #input-ymax, #input-ymin {
@@ -207,6 +213,16 @@ h3 {
 
 #input-xmax, #input-xmin, #input-ymax, #input-ymin {
     width: 120px;
+}
+
+.square-config label {
+    width: 90px; /* Ajuste conforme necessário */
+    text-align: start; /* Alinha o texto à direita */
+    display: inline-block;
+}
+
+.square-config input {
+    margin-left: 13px;
 }
 
 #left-bar button, #right-bar button {
@@ -249,7 +265,10 @@ hr {
 }
 
 #draw-square-btn {
-    border-radius: 20px;
+    margin-top: auto; /* Fixa o botão no final */
+    padding: 8px;
+    border-radius: 10px;
+    width: 90%;
 }
 
 .scroll-container {
