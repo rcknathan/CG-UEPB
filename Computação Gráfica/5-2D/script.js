@@ -224,16 +224,42 @@ function aplicarRotacaoMatriz() {
 }
 
 
-//Matriz de Escala
-function criarMatrizEscala(sx, sy) {
+function criarMatrizTranslacao(tx, ty) {
     return [
-        [sx, 0, 0],
-        [0, sy, 0],
+        [1, 0, tx],
+        [0, 1, ty],
         [0, 0, 1]
     ];
 }
 
-function aplicarEscalaMatriz() {
+function multiplicarMatrizes(a, b) {
+    const resultado = [];
+    for (let i = 0; i < 3; i++) {
+        resultado[i] = [];
+        for (let j = 0; j < 3; j++) {
+            resultado[i][j] = 0;
+            for (let k = 0; k < 3; k++) {
+                resultado[i][j] += a[i][k] * b[k][j];
+            }
+        }
+    }
+    return resultado;
+}
+
+function multiplicarMatrizVetor(matriz, vetor) {
+    const [x, y] = vetor;
+    const vetorHomogeneo = [x, y, 1];
+    const resultado = [0, 0, 0];
+    for (let i = 0; i < 3; i++) {
+        resultado[i] = 0;
+        for (let j = 0; j < 3; j++) {
+            resultado[i] += matriz[i][j] * vetorHomogeneo[j];
+        }
+    }
+    return [resultado[0], resultado[1]];
+}
+
+function aplicarEscalaMatrizComposta() {
     const sx = parseFloat(document.getElementById("x-scale").value) || 1;
     const sy = parseFloat(document.getElementById("y-scale").value) || 1;
 
@@ -242,29 +268,27 @@ function aplicarEscalaMatriz() {
         return;
     }
 
-    // Definir o ponto fixo (50,50)
-    const pontoFixoX = 50;
-    const pontoFixoY = 50;
+    // Calcular o ponto fixo (centro do quadrado)
+    const centroX = (quadradoAtual[0].x + quadradoAtual[1].x + quadradoAtual[2].x + quadradoAtual[3].x) / 4;
+    const centroY = (quadradoAtual[0].y + quadradoAtual[1].y + quadradoAtual[2].y + quadradoAtual[3].y) / 4;
 
-    // Criar as matrizes de transformação
-    const matrizTranslacaoParaOrigem = criarMatrizTranslacao(-pontoFixoX, -pontoFixoY);
-    const matrizEscala = criarMatrizEscala(sx, sy);
-    const matrizTranslacaoDeVolta = criarMatrizTranslacao(pontoFixoX, pontoFixoY);
+    const T_inv = criarMatrizTranslacao(-centroX, -centroY);  // Leva para origem
+    const S = criarMatrizEscala(sx, sy);                     // Escala
+    const T = criarMatrizTranslacao(centroX, centroY);       // Volta para posição original
 
-    // Matriz composta: T⁻¹ × Escala × T
-    const matrizFinal = multiplicarMatrizes(
-        matrizTranslacaoDeVolta,
-        multiplicarMatrizes(matrizEscala, matrizTranslacaoParaOrigem)
+    // Matriz composta: T * S * T⁻¹
+    const matrizComposta = multiplicarMatrizes(
+        T,
+        multiplicarMatrizes(S, T_inv)
     );
 
-    // Aplicar transformação
+    // Aplicar a transformação em cada ponto
     const novosPontos = quadradoAtual.map(ponto => {
-        const vetor = [ponto.x, ponto.y];
-        const [novoX, novoY] = multiplicarMatrizVetor(matrizFinal, vetor);
-        return { x: novoX, y: novoY };
+        const [x, y] = multiplicarMatrizVetor(matrizComposta, [ponto.x, ponto.y]);
+        return { x, y };
     });
 
-    // Redesenhar e atualizar
+    // Atualizar
     redesenharQuadrado(novosPontos);
     quadradoAtual = novosPontos;
     atualizarInformacoesObjeto();
