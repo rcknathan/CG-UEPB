@@ -104,22 +104,32 @@
             </div>
         </div>
 
-        <div class="info-panel">
-            <h4>Vértices do Objeto</h4>
-            <div id="vertices-info"></div>
-        </div>
-
         <button id="clear-btn">Limpar Tudo</button>
-        <button id="back-btn">Voltar ao Início</button>
+        <a id="back" href="../1-Tela Principal/index.html" class="back-link">Voltar ao Início</a>
 
         <div class="credits">
             <p>Implementado por: Erick Nathan, Pedro Lucas</p>
-            <p>Computação Gráfica - Prof. Robson Pequeno de Souza</p>
         </div>
     </div>
 
     <div class="main">
         <canvas id="canvas3d" width="600" height="600"></canvas>
+    </div>
+
+    <div class="sidebar" id="right-sidebar">
+        <div class="info-panel">
+            <h3>Informações do Objeto</h3>
+            <div id="object-info">
+                <h4>Vértices:</h4>
+                <div id="vertices-info" class="info-box">Nenhum objeto gerado.</div>
+                <h4>Centro Geométrico:</h4>
+                <div id="center-info" class="info-box">Nenhum objeto gerado.</div>
+                <h4>Dimensões:</h4>
+                <div id="dimensions-info" class="info-box">Nenhum objeto gerado.</div>
+                <h4>Octante:</h4>
+                <div id="octant-info" class="info-box">Nenhum objeto gerado.</div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
