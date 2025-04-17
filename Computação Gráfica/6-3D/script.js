@@ -13,6 +13,38 @@ let objectRotationY = 0;
 let objectRotationZ = 0;
 let zoom = 100;
 
+// Função para desenhar um pixel no canvas
+function setPixel(x, y, color = '#000000') {
+    const canvasX = Math.round(x);
+    const canvasY = Math.round(y);
+    
+    if (canvasX >= 0 && canvasX < canvas.width && canvasY >= 0 && canvasY < canvas.height) {
+        ctx.fillStyle = color;
+        ctx.fillRect(canvasX, canvasY, 1, 1);
+    }
+}
+
+// Algoritmo DDA para desenhar linhas
+function drawLineDDA(x1, y1, x2, y2, color = '#000000') {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const steps = Math.max(Math.abs(dx), Math.abs(dy));
+    
+    const xIncrement = dx / steps;
+    const yIncrement = dy / steps;
+    
+    let x = x1;
+    let y = y1;
+    
+    setPixel(x, y, color);
+    
+    for (let i = 0; i < steps; i++) {
+        x += xIncrement;
+        y += yIncrement;
+        setPixel(x, y, color);
+    }
+}
+
 // Matrizes de transformação 3D
 class Matrix3D {
     static multiply(a, b) {
@@ -30,7 +62,6 @@ class Matrix3D {
                 }
             }
         }
-
         return result;
     }
 
@@ -42,15 +73,6 @@ class Matrix3D {
             }
         }
         return result;
-    }
-
-    static identity() {
-        return [
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ];
     }
 
     static translation(tx, ty, tz) {
@@ -162,9 +184,8 @@ function createPrism(size) {
     return { vertices, edges };
 }
 
-// Função para projetar um ponto 3D em 2D
+// Função de projeção 3D para 2D
 function projectPoint(x, y, z, applyObjectRotation = true) {
-    // Aplicar rotação do objeto se necessário
     let point = [x, y, z, 1];
     
     if (applyObjectRotation) {
@@ -176,7 +197,6 @@ function projectPoint(x, y, z, applyObjectRotation = true) {
         point = Matrix3D.multiplyVector(transform, point);
     }
     
-    // Projeção isométrica fixa para visualização
     const f = zoom / 100;
     const px = (point[0] - point[2]) * f * 0.7071 + canvas.width / 2;
     const py = (-point[1] + (point[0] + point[2]) * 0.5) * f * 0.7071 + canvas.height / 2;
@@ -189,29 +209,17 @@ function drawFixedAxes() {
     const center = { x: canvas.width / 2, y: canvas.height / 2 };
     const length = 100 * (zoom / 100);
     
-    // Eixo X (vermelho) - não aplica rotação do objeto
+    // Eixo X (vermelho)
     const xEnd = projectPoint(length, 0, 0, false);
-    ctx.strokeStyle = 'red';
-    ctx.beginPath();
-    ctx.moveTo(center.x, center.y);
-    ctx.lineTo(xEnd.x, xEnd.y);
-    ctx.stroke();
+    drawLineDDA(center.x, center.y, xEnd.x, xEnd.y, 'red');
     
-    // Eixo Y (verde) - não aplica rotação do objeto
+    // Eixo Y (verde)
     const yEnd = projectPoint(0, length, 0, false);
-    ctx.strokeStyle = 'green';
-    ctx.beginPath();
-    ctx.moveTo(center.x, center.y);
-    ctx.lineTo(yEnd.x, yEnd.y);
-    ctx.stroke();
+    drawLineDDA(center.x, center.y, yEnd.x, yEnd.y, 'green');
     
-    // Eixo Z (azul) - não aplica rotação do objeto
+    // Eixo Z (azul)
     const zEnd = projectPoint(0, 0, length, false);
-    ctx.strokeStyle = 'blue';
-    ctx.beginPath();
-    ctx.moveTo(center.x, center.y);
-    ctx.lineTo(zEnd.x, zEnd.y);
-    ctx.stroke();
+    drawLineDDA(center.x, center.y, zEnd.x, zEnd.y, 'blue');
     
     // Rótulos dos eixos
     ctx.font = '12px Arial';
@@ -223,109 +231,99 @@ function drawFixedAxes() {
     ctx.fillText('Z', zEnd.x - 15, zEnd.y);
 }
 
-// Função para desenhar os octantes
+// Função para desenhar os 8 octantes
 function drawOctants() {
-    const center = { x: canvas.width / 2, y: canvas.height / 2 };
     const size = 100 * (zoom / 100);
     
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-    ctx.lineWidth = 1.8;
-    
-    // Pontos dos vértices do cubo de octantes
-    const points = [
-        projectPoint(size, size, size, false),
-        projectPoint(-size, size, size, false),
-        projectPoint(-size, -size, size, false),
-        projectPoint(size, -size, size, false),
-        projectPoint(size, size, -size, false),
-        projectPoint(-size, size, -size, false),
-        projectPoint(-size, -size, -size, false),
-        projectPoint(size, -size, -size, false)
+    // Define os 8 vértices do cubo que representa os octantes
+    const vertices = [
+        projectPoint(size, size, size),      // Octante 1
+        projectPoint(-size, size, size),     // Octante 2
+        projectPoint(-size, -size, size),    // Octante 3
+        projectPoint(size, -size, size),     // Octante 4
+        projectPoint(size, size, -size),     // Octante 5
+        projectPoint(-size, size, -size),    // Octante 6
+        projectPoint(-size, -size, -size),   // Octante 7
+        projectPoint(size, -size, -size)     // Octante 8
     ];
-    
-    // Arestas do cubo que representa os octantes
+
+    // Arestas que conectam os vértices (formando um cubo)
     const edges = [
-        [0, 1], [1, 2], [2, 3], [3, 0], // Face frontal
-        [4, 5], [5, 6], [6, 7], [7, 4], // Face traseira
+        [0, 1], [1, 2], [2, 3], [3, 0], // Face frontal (octantes 1-4)
+        [4, 5], [5, 6], [6, 7], [7, 4], // Face traseira (octantes 5-8)
         [0, 4], [1, 5], [2, 6], [3, 7]  // Arestas laterais
     ];
+
+    // Desenha todas as arestas do cubo
+    ctx.strokeStyle = 'rgba(100, 100, 100, 0.3)';
+    edges.forEach(edge => {
+        const v1 = vertices[edge[0]];
+        const v2 = vertices[edge[1]];
+        drawLineDDA(v1.x, v1.y, v2.x, v2.y, 'rgba(100, 100, 100, 0.3)');
+    });
+
+    // Desenha rótulos dos octantes
+    ctx.font = 'bold 14px Arial';
+    ctx.fillStyle = '#333';
     
-    for (const edge of edges) {
-        const p1 = points[edge[0]];
-        const p2 = points[edge[1]];
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-    }
-    
-    // Rótulos dos octantes
-    ctx.font = '10px Arial';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    
-    const octantPositions = [
-        { x: size/2, y: size/2, z: size/2, label: '1' },
-        { x: -size/2, y: size/2, z: size/2, label: '2' },
-        { x: -size/2, y: -size/2, z: size/2, label: '3' },
-        { x: size/2, y: -size/2, z: size/2, label: '4' },
-        { x: size/2, y: size/2, z: -size/2, label: '5' },
-        { x: -size/2, y: size/2, z: -size/2, label: '6' },
-        { x: -size/2, y: -size/2, z: -size/2, label: '7' },
-        { x: size/2, y: -size/2, z: -size/2, label: '8' }
+    // Posições dos rótulos dentro de cada octante
+    const labelPositions = [
+        projectPoint(size/2, size/2, size/2),      // Octante 1
+        projectPoint(-size/2, size/2, size/2),     // Octante 2
+        projectPoint(-size/2, -size/2, size/2),    // Octante 3
+        projectPoint(size/2, -size/2, size/2),     // Octante 4
+        projectPoint(size/2, size/2, -size/2),     // Octante 5
+        projectPoint(-size/2, size/2, -size/2),    // Octante 6
+        projectPoint(-size/2, -size/2, -size/2),   // Octante 7
+        projectPoint(size/2, -size/2, -size/2)     // Octante 8
     ];
+
+    // Desenha os números dos octantes
+    labelPositions.forEach((pos, index) => {
+        ctx.fillText((index + 1).toString(), pos.x - 5, pos.y + 5);
+    });
+}
+
+// Função para desenhar o objeto 3D
+function drawObject() {
+    // Limpa o canvas
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    for (const octant of octantPositions) {
-        const p = projectPoint(octant.x, octant.y, octant.z, false);
-        ctx.fillText(octant.label, p.x, p.y);
+    // Desenha os eixos
+    drawFixedAxes();
+
+    if (!currentObject) return;
+
+    // Desenha todas as arestas do objeto
+    ctx.strokeStyle = '#111';
+    for (const edge of objectEdges) {
+        const v1 = objectVertices[edge[0]];
+        const v2 = objectVertices[edge[1]];
+        
+        const p1 = projectPoint(v1[0], v1[1], v1[2]);
+        const p2 = projectPoint(v2[0], v2[1], v2[2]);
+        
+        drawLineDDA(p1.x, p1.y, p2.x, p2.y, '#111');
     }
-}
 
-// Função para determinar o octante de um ponto
-function getOctant(x, y, z) {
-    if (x >= 0 && y >= 0 && z >= 0) return 1;
-    if (x < 0 && y >= 0 && z >= 0) return 2;
-    if (x < 0 && y < 0 && z >= 0) return 3;
-    if (x >= 0 && y < 0 && z >= 0) return 4;
-    if (x >= 0 && y >= 0 && z < 0) return 5;
-    if (x < 0 && y >= 0 && z < 0) return 6;
-    if (x < 0 && y < 0 && z < 0) return 7;
-    if (x >= 0 && y < 0 && z < 0) return 8;
-    return 0;
-}
-
-// Função para determinar o octante predominante do objeto
-function getObjectOctant() {
-    if (objectVertices.length === 0) return null;
-    
-    const octantCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    
+    // Desenha os vértices
     for (const vertex of objectVertices) {
-        const octant = getOctant(vertex[0], vertex[1], vertex[2]);
-        octantCounts[octant]++;
+        const p = projectPoint(vertex[0], vertex[1], vertex[2]);
+        setPixel(p.x, p.y, '#222');
     }
-    
-    // Encontrar o octante com mais vértices
-    let maxCount = 0;
-    let predominantOctant = 0;
-    
-    for (let i = 1; i <= 8; i++) {
-        if (octantCounts[i] > maxCount) {
-            maxCount = octantCounts[i];
-            predominantOctant = i;
-        }
-    }
-    
-    return predominantOctant;
+
+    updateObjectInfo();
 }
 
-// Função para atualizar informações do objeto na sidebar
+// Função para atualizar informações do objeto
 function updateObjectInfo() {
     const verticesInfo = document.getElementById('vertices-info');
     const centerInfo = document.getElementById('center-info');
     const dimensionsInfo = document.getElementById('dimensions-info');
     const octantInfo = document.getElementById('octant-info');
     
-    if (objectVertices.length === 0) {
+    if (!currentObject) {
         verticesInfo.innerHTML = "Nenhum objeto gerado.";
         centerInfo.innerHTML = "Nenhum objeto gerado.";
         dimensionsInfo.innerHTML = "Nenhum objeto gerado.";
@@ -333,14 +331,14 @@ function updateObjectInfo() {
         return;
     }
     
-    // Informações dos vértices
+    // Atualiza informações dos vértices
     let verticesHTML = '';
     objectVertices.forEach((vertex, index) => {
         verticesHTML += `<div class="vertex-info">V${index+1}: (${vertex[0].toFixed(1)}, ${vertex[1].toFixed(1)}, ${vertex[2].toFixed(1)})</div>`;
     });
     verticesInfo.innerHTML = verticesHTML;
     
-    // Centro geométrico
+    // Calcula centro geométrico
     let centerX = 0, centerY = 0, centerZ = 0;
     for (const vertex of objectVertices) {
         centerX += vertex[0];
@@ -353,7 +351,7 @@ function updateObjectInfo() {
     
     centerInfo.innerHTML = `(${centerX.toFixed(1)}, ${centerY.toFixed(1)}, ${centerZ.toFixed(1)})`;
     
-    // Dimensões
+    // Calcula dimensões
     let minX = Infinity, maxX = -Infinity;
     let minY = Infinity, maxY = -Infinity;
     let minZ = Infinity, maxZ = -Infinity;
@@ -367,72 +365,26 @@ function updateObjectInfo() {
         maxZ = Math.max(maxZ, vertex[2]);
     }
     
-    const width = (maxX - minX).toFixed(1);
-    const height = (maxY - minY).toFixed(1);
-    const depth = (maxZ - minZ).toFixed(1);
+    dimensionsInfo.innerHTML = `Largura: ${(maxX-minX).toFixed(1)}<br>Altura: ${(maxY-minY).toFixed(1)}<br>Profundidade: ${(maxZ-minZ).toFixed(1)}`;
     
-    dimensionsInfo.innerHTML = `Largura: ${width}<br>Altura: ${height}<br>Profundidade: ${depth}`;
-    
-    // Octante predominante
-    const octant = getObjectOctant();
-    octantInfo.innerHTML = octant ? `Octante ${octant}` : "Indeterminado";
-}
-
-// Função para desenhar o objeto
-function drawObject() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Fundo branco para melhor contraste
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Desenhar eixos fixos e octantes primeiro (mais claros)
-    drawOctants(); // Octantes em cinza claro
-    drawFixedAxes(); // Eixos coloridos
-
-    if (!currentObject) return;
-
-    // Configurações para as arestas do objeto
-    ctx.strokeStyle = '#111'; // Cinza muito escuro (quase preto)
-    ctx.lineWidth = 2.5; // Linha um pouco mais grossa
-    ctx.lineCap = 'round'; // Pontas arredondadas para melhor visualização
-
-    // Desenhar arestas (aplicando rotação do objeto)
-    for (const edge of objectEdges) {
-        const v1 = objectVertices[edge[0]];
-        const v2 = objectVertices[edge[1]];
-        
-        const p1 = projectPoint(v1[0], v1[1], v1[2]);
-        const p2 = projectPoint(v2[0], v2[1], v2[2]);
-        
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-    }
-
-    // Configurações para os vértices
-    ctx.fillStyle = '#222'; // Cinza escuro para os vértices
-    const vertexSize = 3.5; // Tamanho um pouco maior
-
-    // Desenhar vértices (aplicando rotação do objeto)
-    for (const vertex of objectVertices) {
-        const p = projectPoint(vertex[0], vertex[1], vertex[2]);
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, vertexSize, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    updateObjectInfo();
-}
-
-// Aplicar transformação aos vértices
-function applyTransformation(matrix) {
-    objectVertices = objectVertices.map(vertex => {
-        const transformed = Matrix3D.multiplyVector(matrix, [...vertex, 1]);
-        return [transformed[0], transformed[1], transformed[2]];
+    // Determina octante predominante
+    const octantCount = [0,0,0,0,0,0,0,0,0];
+    objectVertices.forEach(vertex => {
+        const x = vertex[0], y = vertex[1], z = vertex[2];
+        let octant = 0;
+        if (x >= 0 && y >= 0 && z >= 0) octant = 1;
+        else if (x < 0 && y >= 0 && z >= 0) octant = 2;
+        else if (x < 0 && y < 0 && z >= 0) octant = 3;
+        else if (x >= 0 && y < 0 && z >= 0) octant = 4;
+        else if (x >= 0 && y >= 0 && z < 0) octant = 5;
+        else if (x < 0 && y >= 0 && z < 0) octant = 6;
+        else if (x < 0 && y < 0 && z < 0) octant = 7;
+        else if (x >= 0 && y < 0 && z < 0) octant = 8;
+        octantCount[octant]++;
     });
-    drawObject();
+    
+    const predominantOctant = octantCount.indexOf(Math.max(...octantCount.slice(1)));
+    octantInfo.innerHTML = predominantOctant > 0 ? `Octante ${predominantOctant}` : "Indeterminado";
 }
 
 // Event Listeners
@@ -452,12 +404,10 @@ document.getElementById('generate-object-btn').addEventListener('click', () => {
             break;
     }
     
-    // Resetar rotações ao gerar novo objeto
     objectRotationX = 0;
     objectRotationY = 0;
     objectRotationZ = 0;
     
-    // Resetar controles deslizantes
     document.getElementById('view-rot-x').value = 0;
     document.getElementById('view-rot-y').value = 0;
     document.getElementById('view-rot-x-value').textContent = '0°';
@@ -479,7 +429,11 @@ document.getElementById('apply-translation').addEventListener('click', () => {
     const tz = parseFloat(document.getElementById('tz').value) || 0;
     
     const translationMatrix = Matrix3D.translation(tx, ty, tz);
-    applyTransformation(translationMatrix);
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(translationMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+    drawObject();
 });
 
 document.getElementById('apply-rotation').addEventListener('click', () => {
@@ -491,7 +445,6 @@ document.getElementById('apply-rotation').addEventListener('click', () => {
     const axis = document.getElementById('rotation-axis').value;
     const angle = parseFloat(document.getElementById('rotation-angle').value) || 0;
     
-    // Aplicar rotação incremental ao objeto
     switch (axis) {
         case 'x':
             objectRotationX += angle;
@@ -508,7 +461,6 @@ document.getElementById('apply-rotation').addEventListener('click', () => {
             break;
     }
     
-    // Redesenhar o objeto com as novas rotações
     drawObject();
 });
 
@@ -523,10 +475,13 @@ document.getElementById('apply-scale').addEventListener('click', () => {
     const sz = parseFloat(document.getElementById('sz').value) || 1;
     
     const scalingMatrix = Matrix3D.scaling(sx, sy, sz);
-    applyTransformation(scalingMatrix);
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(scalingMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+    drawObject();
 });
 
-// Controles de rotação do objeto
 document.getElementById('view-rot-x').addEventListener('input', (e) => {
     objectRotationX = parseInt(e.target.value);
     document.getElementById('view-rot-x-value').textContent = objectRotationX + '°';
@@ -545,21 +500,6 @@ document.getElementById('view-zoom').addEventListener('input', (e) => {
     drawObject();
 });
 
-// Controle de abas
-document.querySelectorAll('.tab-button').forEach(button => {
-    button.addEventListener('click', () => {
-        // Remove active class from all buttons and contents
-        document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        
-        // Add active class to clicked button and corresponding content
-        button.classList.add('active');
-        const tabId = button.getAttribute('data-tab') + '-tab';
-        document.getElementById(tabId).classList.add('active');
-    });
-});
-
-// Botão limpar
 document.getElementById('clear-btn').addEventListener('click', () => {
     currentObject = null;
     objectVertices = [];
@@ -568,7 +508,6 @@ document.getElementById('clear-btn').addEventListener('click', () => {
     objectRotationY = 0;
     objectRotationZ = 0;
     
-    // Resetar controles
     document.getElementById('view-rot-x').value = 0;
     document.getElementById('view-rot-y').value = 0;
     document.getElementById('view-rot-x-value').textContent = '0°';
@@ -576,13 +515,20 @@ document.getElementById('clear-btn').addEventListener('click', () => {
     document.getElementById('view-zoom').value = 100;
     document.getElementById('view-zoom-value').textContent = '100%';
     
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawFixedAxes();
-    drawOctants();
     updateObjectInfo();
 });
 
+// Navegação - Voltar ao Início
+document.getElementById('back').addEventListener('click', function(e) {
+    e.preventDefault();
+    window.location.href = this.getAttribute('href');
+});
+
 // Inicialização
+ctx.fillStyle = 'white';
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 drawFixedAxes();
-drawOctants();
 updateObjectInfo();
