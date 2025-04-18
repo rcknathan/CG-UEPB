@@ -122,24 +122,43 @@ button:hover {
     margin-bottom: 5px;
 }
 
-.credits {
-    margin-top: 20px;
-    font-size: 12px;
-    color: #666;
+#credits1, #credits2 {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgb(112, 110, 110);
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
     text-align: center;
 }
 
-#back-btn {
-    background-color: #666;
-    margin-top: 15px;
+#credits1 {
+    bottom: 20px;
 }
 
-#back-btn:hover {
-    background-color: #555;
+#credits2 {
+    bottom: -5px;
+}
+
+#back {
+    color: rgb(112, 110, 110); /* Cor do texto */
+    text-decoration: none; /* Remove o sublinhado padrão */
+    font-weight: bold; /* Deixa o texto um pouco mais forte */
+    padding: 5px;
+    transition: 0.3s; /* Suaviza a transição */
+    position: fixed;
+    top: 5%;
+    user-select: none;
+}
+
+#back:hover {
+    text-decoration: underline; /* Adiciona sublinhado ao passar o mouse */
 }
 
 .tab-buttons {
     display: flex;
+    flex-direction: column;
     margin-bottom: 10px;
 }
 

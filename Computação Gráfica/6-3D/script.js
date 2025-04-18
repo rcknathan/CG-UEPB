@@ -13,6 +13,9 @@ let objectRotationY = 0;
 let objectRotationZ = 0;
 let zoom = 100;
 
+// Histórico de transformações
+let transformationHistory = [];
+
 // Função para desenhar um pixel no canvas
 function setPixel(x, y, color = '#000000') {
     const canvasX = Math.round(x);
@@ -128,7 +131,152 @@ class Matrix3D {
             [0, 0, 0, 1]
         ];
     }
+
+    // Função de cisalhamento
+    static shear(shXY, shXZ, shYZ) {
+        return [
+            [1, shXY, shXZ, 0],
+            [0, 1, shYZ, 0],
+            [0, 0, 1, 0],
+            [0, 0, 0, 1]
+        ];
+    }
+
+    // Função de reflexão
+    static reflection(axis) {
+        switch (axis) {
+            case 'xy':
+                return [
+                    [1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, -1, 0],
+                    [0, 0, 0, 1]
+                ];
+            case 'xz':
+                return [
+                    [1, 0, 0, 0],
+                    [0, -1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]
+                ];
+            case 'yz':
+                return [
+                    [-1, 0, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1]
+                ];
+        }
+    }
 }
+
+// Funçoes para aplicar as transformações em 3D
+document.getElementById('apply-scale').addEventListener('click', () => {
+    if (!currentObject) {
+        alert('Gere um objeto primeiro!');
+        return;
+    }
+    
+    const sx = parseFloat(document.getElementById('sx').value) || 1;
+    const sy = parseFloat(document.getElementById('sy').value) || 1;
+    const sz = parseFloat(document.getElementById('sz').value) || 1;
+    
+    const scalingMatrix = Matrix3D.scaling(sx, sy, sz);
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(scalingMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+    updateTransformationHistory(`Escala (SX: ${sx}, SY: ${sy}, SZ: ${sz})`);
+    drawObject();
+});
+
+document.getElementById('apply-shear').addEventListener('click', () => {
+    if (!currentObject) {
+        alert('Gere um objeto primeiro!');
+        return;
+    }
+
+    const shXY = parseFloat(document.getElementById('sh-xy').value) || 0;
+    const shXZ = parseFloat(document.getElementById('sh-xz').value) || 0;
+    const shYZ = parseFloat(document.getElementById('sh-yz').value) || 0;
+
+    const shearMatrix = Matrix3D.shear(shXY, shXZ, shYZ);
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(shearMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+
+    updateTransformationHistory(`Cisalhamento (XY: ${shXY}, XZ: ${shXZ}, YZ: ${shYZ})`);
+    drawObject();
+});
+
+document.getElementById('apply-reflection').addEventListener('click', () => {
+    if (!currentObject) {
+        alert('Gere um objeto primeiro!');
+        return;
+    }
+
+    const axis = document.getElementById('reflection-axis').value;
+    const reflectionMatrix = Matrix3D.reflection(axis);
+
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(reflectionMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+
+    updateTransformationHistory(`Reflexão no plano ${axis.toUpperCase()}`);
+    drawObject();
+});
+
+
+document.getElementById('apply-translation').addEventListener('click', () => {
+    if (!currentObject) {
+        alert('Gere um objeto primeiro!');
+        return;
+    }
+    
+    const tx = parseFloat(document.getElementById('tx').value) || 0;
+    const ty = parseFloat(document.getElementById('ty').value) || 0;
+    const tz = parseFloat(document.getElementById('tz').value) || 0;
+    
+    const translationMatrix = Matrix3D.translation(tx, ty, tz);
+    objectVertices = objectVertices.map(vertex => {
+        const transformed = Matrix3D.multiplyVector(translationMatrix, [...vertex, 1]);
+        return [transformed[0], transformed[1], transformed[2]];
+    });
+    updateTransformationHistory(`Translação (TX: ${tx}, TY: ${ty}, TZ: ${tz})`);
+    drawObject();
+});
+
+document.getElementById('apply-rotation').addEventListener('click', () => {
+    if (!currentObject) {
+        alert('Gere um objeto primeiro!');
+        return;
+    }
+    
+    const axis = document.getElementById('rotation-axis').value;
+    const angle = parseFloat(document.getElementById('rotation-angle').value) || 0;
+    
+    switch (axis) {
+        case 'x':
+            objectRotationX += angle;
+            document.getElementById('view-rot-x').value = objectRotationX;
+            document.getElementById('view-rot-x-value').textContent = objectRotationX + '°';
+            break;
+        case 'y':
+            objectRotationY += angle;
+            document.getElementById('view-rot-y').value = objectRotationY;
+            document.getElementById('view-rot-y-value').textContent = objectRotationY + '°';
+            break;
+        case 'z':
+            objectRotationZ += angle;
+            break;
+    }
+    
+    updateTransformationHistory(`Rotação (Eixo: ${axis.toUpperCase()}, Ângulo: ${angle}°)`);
+    drawObject();
+});
+
 
 // Funções para criar objetos 3D
 function createCube(size) {
@@ -233,18 +381,21 @@ function drawFixedAxes() {
 
 // Função para desenhar os 8 octantes
 function drawOctants() {
-    const size = 100 * (zoom / 100);
-    
+    // Define o tamanho dos octantes com base no tamanho do canvas
+    const sizeX = canvas.width / 2;
+    const sizeY = canvas.height / 2;
+    const sizeZ = Math.min(sizeX, sizeY); // Para manter a proporção no eixo Z
+
     // Define os 8 vértices do cubo que representa os octantes
     const vertices = [
-        projectPoint(size, size, size),      // Octante 1
-        projectPoint(-size, size, size),     // Octante 2
-        projectPoint(-size, -size, size),    // Octante 3
-        projectPoint(size, -size, size),     // Octante 4
-        projectPoint(size, size, -size),     // Octante 5
-        projectPoint(-size, size, -size),    // Octante 6
-        projectPoint(-size, -size, -size),   // Octante 7
-        projectPoint(size, -size, -size)     // Octante 8
+        projectPoint(sizeX, sizeY, sizeZ, false),      // Octante 1
+        projectPoint(-sizeX, sizeY, sizeZ, false),     // Octante 2
+        projectPoint(-sizeX, -sizeY, sizeZ, false),    // Octante 3
+        projectPoint(sizeX, -sizeY, sizeZ, false),     // Octante 4
+        projectPoint(sizeX, sizeY, -sizeZ, false),     // Octante 5
+        projectPoint(-sizeX, sizeY, -sizeZ, false),    // Octante 6
+        projectPoint(-sizeX, -sizeY, -sizeZ, false),   // Octante 7
+        projectPoint(sizeX, -sizeY, -sizeZ, false)     // Octante 8
     ];
 
     // Arestas que conectam os vértices (formando um cubo)
@@ -265,17 +416,17 @@ function drawOctants() {
     // Desenha rótulos dos octantes
     ctx.font = 'bold 14px Arial';
     ctx.fillStyle = '#333';
-    
+
     // Posições dos rótulos dentro de cada octante
     const labelPositions = [
-        projectPoint(size/2, size/2, size/2),      // Octante 1
-        projectPoint(-size/2, size/2, size/2),     // Octante 2
-        projectPoint(-size/2, -size/2, size/2),    // Octante 3
-        projectPoint(size/2, -size/2, size/2),     // Octante 4
-        projectPoint(size/2, size/2, -size/2),     // Octante 5
-        projectPoint(-size/2, size/2, -size/2),    // Octante 6
-        projectPoint(-size/2, -size/2, -size/2),   // Octante 7
-        projectPoint(size/2, -size/2, -size/2)     // Octante 8
+        projectPoint(sizeX / 2, sizeY / 2, sizeZ / 2, false),      // Octante 1
+        projectPoint(-sizeX / 2, sizeY / 2, sizeZ / 2, false),     // Octante 2
+        projectPoint(-sizeX / 2, -sizeY / 2, sizeZ / 2, false),    // Octante 3
+        projectPoint(sizeX / 2, -sizeY / 2, sizeZ / 2, false),     // Octante 4
+        projectPoint(sizeX / 2, sizeY / 2, -sizeZ / 2, false),     // Octante 5
+        projectPoint(-sizeX / 2, sizeY / 2, -sizeZ / 2, false),    // Octante 6
+        projectPoint(-sizeX / 2, -sizeY / 2, -sizeZ / 2, false),   // Octante 7
+        projectPoint(sizeX / 2, -sizeY / 2, -sizeZ / 2, false)     // Octante 8
     ];
 
     // Desenha os números dos octantes
@@ -314,6 +465,7 @@ function drawObject() {
     }
 
     updateObjectInfo();
+    drawOctants(); // Desenha os octantes
 }
 
 // Função para atualizar informações do objeto
@@ -387,6 +539,13 @@ function updateObjectInfo() {
     octantInfo.innerHTML = predominantOctant > 0 ? `Octante ${predominantOctant}` : "Indeterminado";
 }
 
+// Atualiza o histórico de transformações
+function updateTransformationHistory(transformation) {
+    transformationHistory.push(transformation);
+    const historyElement = document.getElementById('transformation-history');
+    historyElement.innerHTML = transformationHistory.map((t, i) => `<div>${i + 1}. ${t}</div>`).join('');
+}
+
 // Event Listeners
 document.getElementById('generate-object-btn').addEventListener('click', () => {
     const objectType = document.getElementById('object-type-select').value;
@@ -418,70 +577,6 @@ document.getElementById('generate-object-btn').addEventListener('click', () => {
     drawObject();
 });
 
-document.getElementById('apply-translation').addEventListener('click', () => {
-    if (!currentObject) {
-        alert('Gere um objeto primeiro!');
-        return;
-    }
-    
-    const tx = parseFloat(document.getElementById('tx').value) || 0;
-    const ty = parseFloat(document.getElementById('ty').value) || 0;
-    const tz = parseFloat(document.getElementById('tz').value) || 0;
-    
-    const translationMatrix = Matrix3D.translation(tx, ty, tz);
-    objectVertices = objectVertices.map(vertex => {
-        const transformed = Matrix3D.multiplyVector(translationMatrix, [...vertex, 1]);
-        return [transformed[0], transformed[1], transformed[2]];
-    });
-    drawObject();
-});
-
-document.getElementById('apply-rotation').addEventListener('click', () => {
-    if (!currentObject) {
-        alert('Gere um objeto primeiro!');
-        return;
-    }
-    
-    const axis = document.getElementById('rotation-axis').value;
-    const angle = parseFloat(document.getElementById('rotation-angle').value) || 0;
-    
-    switch (axis) {
-        case 'x':
-            objectRotationX += angle;
-            document.getElementById('view-rot-x').value = objectRotationX;
-            document.getElementById('view-rot-x-value').textContent = objectRotationX + '°';
-            break;
-        case 'y':
-            objectRotationY += angle;
-            document.getElementById('view-rot-y').value = objectRotationY;
-            document.getElementById('view-rot-y-value').textContent = objectRotationY + '°';
-            break;
-        case 'z':
-            objectRotationZ += angle;
-            break;
-    }
-    
-    drawObject();
-});
-
-document.getElementById('apply-scale').addEventListener('click', () => {
-    if (!currentObject) {
-        alert('Gere um objeto primeiro!');
-        return;
-    }
-    
-    const sx = parseFloat(document.getElementById('sx').value) || 1;
-    const sy = parseFloat(document.getElementById('sy').value) || 1;
-    const sz = parseFloat(document.getElementById('sz').value) || 1;
-    
-    const scalingMatrix = Matrix3D.scaling(sx, sy, sz);
-    objectVertices = objectVertices.map(vertex => {
-        const transformed = Matrix3D.multiplyVector(scalingMatrix, [...vertex, 1]);
-        return [transformed[0], transformed[1], transformed[2]];
-    });
-    drawObject();
-});
-
 document.getElementById('view-rot-x').addEventListener('input', (e) => {
     objectRotationX = parseInt(e.target.value);
     document.getElementById('view-rot-x-value').textContent = objectRotationX + '°';
@@ -500,6 +595,26 @@ document.getElementById('view-zoom').addEventListener('input', (e) => {
     drawObject();
 });
 
+//Alternar entre as transformaçoes
+document.addEventListener("DOMContentLoaded", () => {
+    const tabButtons = document.querySelectorAll(".tab-button");
+    const tabContents = document.querySelectorAll(".tab-content");
+
+    tabButtons.forEach(button => {
+        button.addEventListener("click", () => {
+            // Remove a classe 'active' de todos os botões e conteúdos
+            tabButtons.forEach(btn => btn.classList.remove("active"));
+            tabContents.forEach(content => content.classList.remove("active"));
+
+            // Adiciona a classe 'active' ao botão e conteúdo clicado
+            button.classList.add("active");
+            const tabId = button.getAttribute("data-tab");
+            document.getElementById(`${tabId}-tab`).classList.add("active");
+        });
+    });
+});
+
+//Botao Limpar
 document.getElementById('clear-btn').addEventListener('click', () => {
     currentObject = null;
     objectVertices = [];
@@ -519,6 +634,8 @@ document.getElementById('clear-btn').addEventListener('click', () => {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     drawFixedAxes();
     updateObjectInfo();
+    transformationHistory = [];
+    document.getElementById('transformation-history').innerHTML = "Nenhuma transformação aplicada.";
 });
 
 // Navegação - Voltar ao Início
@@ -530,5 +647,6 @@ document.getElementById('back').addEventListener('click', function(e) {
 // Inicialização
 ctx.fillStyle = 'white';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
-drawFixedAxes();
+drawFixedAxes(); 
+drawOctants();
 updateObjectInfo();
